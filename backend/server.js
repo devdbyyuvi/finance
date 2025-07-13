@@ -12,6 +12,14 @@ const adminRouter = require('./routes/adminRoute')
 
 server.use(cors({
     origin : process.env.FRONTEND,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'Accept',
+    'Origin'
+  ],
     credentials: true
 }));
 server.use(express.json());

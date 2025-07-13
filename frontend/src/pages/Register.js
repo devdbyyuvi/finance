@@ -69,31 +69,11 @@ export function Register() {
             value: confirmPwd
         }
     ]
-    console.log(process.env.REACT_APP_BACKEND)
     const submitForm = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
         setSuccess('');
-
-        // if (!firstName || !lastName || !email || !pwd || !confirmPwd) {
-        //     setError('All fields are required');
-        //     setLoading(false);
-        //     return;
-        // }
-
-        // if (pwd !== confirmPwd) {
-        //     setError('Passwords do not match');
-        //     setLoading(false);
-        //     return;
-        // }
-
-        // if (pwd.length < 6) {
-        //     setError('Password must be at least 6 characters long');
-        //     setLoading(false);
-        //     return;
-        // }
-
         try {
             const response = await fetch(`${process.env.REACT_APP_BACKEND}api/auth/register`   , {
                 method: 'POST',

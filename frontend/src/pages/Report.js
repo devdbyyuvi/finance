@@ -1,15 +1,15 @@
 import { Navbar } from "../components/Navbar";
 
-export function Profile() {
+export function Report() {
     return (
         <>
             <style>{
-                `.profile{
+                `.report{
                     min-height: 100vh;
                     padding: 20px;
                     margin: 0;
                 }
-                .profile-body{
+                .report-body{
                     max-width: 1200px;
                     margin: 0 auto;
                     background: rgba(30, 32, 47, 0.95);
@@ -67,11 +67,9 @@ export function Profile() {
                 }
                 `
             }</style>
-            <div className="profile">
-                <div className="profile-body">
-                    <h2 className="welcome-header">
-                        User Profile
-                    </h2>
+            <div className="report">
+                <div className="report-body">
+                    <h2 className="welcome-header">Report</h2>
                     <Navbar />
                 </div>
             </div>

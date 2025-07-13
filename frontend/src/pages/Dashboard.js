@@ -22,7 +22,7 @@ export function Dashboard() {
                     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
                     padding: 30px;
                     backdrop-filter: blur(10px);
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    font-family: 'Inter', Tahoma, Geneva, Verdana, sans-serif;
                 }
 
                 .welcome-header {

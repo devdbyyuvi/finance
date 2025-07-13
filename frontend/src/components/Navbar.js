@@ -3,8 +3,12 @@ export const Navbar = () => (
         <button onClick={()=>{
             window.location.href='/dashboard';
         }}>Dashboard</button>
-        <button>Reports</button>
-        <button>Profile</button>
+        <button onClick={()=>{
+            window.location = '/reports';
+        }}>Reports</button>
+        <button onClick={()=>{
+            window.location.href='/profile';
+        }}>Profile</button>
         <button>Logout</button>
     </div>
 );

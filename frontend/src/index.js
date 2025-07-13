@@ -9,6 +9,7 @@ import { Register } from './pages/Register';
 import { Profile } from './pages/Profile';
 import { Admin } from './pages/Admin';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Report } from './pages/Report';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -20,6 +21,7 @@ root.render(
       <Route path="/register" element={<Register />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/admin" element={<Admin />} />
+      <Route path="/reports" element={<Report />} />
     </Routes>
   </BrowserRouter>
 );

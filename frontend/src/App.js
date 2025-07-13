@@ -1,23 +1,18 @@
 import logo from './logo.svg';
-import './App.css';
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>
+        Your Personal Finance Tracker
+      </h1>
+      <p>
+        Welcome to your personal finance tracker! Here you can manage your budget, track transactions, and view your financial health.
+      </p>
+      <div className='btn-flex'>
+        <a href='/login'>Login</a>
+        <a href='/register'>Register</a>
+      </div>
     </div>
   );
 }

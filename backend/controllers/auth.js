@@ -178,8 +178,8 @@ module.exports = {
     },
     updateUser: async (req,res)=>{
         try{
-            const userId = req.params.id;
-            User.findOne({ _id: userId }, async (err, user) => {
+            const userId = req.params.userid;
+            await User.findOne({ _id: userId }, async (err, user) => {
                 if(err){
                    logger.error("Error fetching user : ", err);
                    return res.status(400).json({

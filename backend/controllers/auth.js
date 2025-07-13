@@ -145,5 +145,73 @@ module.exports = {
             logger.error('Error logging out user:', error);
             return res.status(500).json({ error: 'Internal server error' });
         }
+    },
+    getUser : (req,res)=>{
+        try{
+            const userId = req.params.userid;
+            logger.info(`Fetching user with ID: ${userId}`);
+            User.findById(userId, (err,user)=>{
+                if(err){
+                    logger.error('Error fetching user:', err);
+                    return res.status(500).json({ error: 'Internal server error' });
+                }
+                if(!user){
+                    logger.error('User not found:', userId);
+                    return res.status(404).json({ error: 'User not found' });
+                }
+                else{
+                    logger.info('User fetched successfully:', user);
+                    return res.status(200).json({
+                        id: user._id,
+                        firstName: user.firstName,
+                        lastName: user.lastName,
+                        email: user.email,
+                        role: user.role
+                    });
+                }
+            })
+        }
+        catch (error) {
+            logger.error('Error fetching user:', error);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+    },
+    updateUser: async (req,res)=>{
+        try{
+            const userId = req.params.id;
+            User.findOne({ _id: userId }, async (err, user) => {
+                if(err){
+                   logger.error("Error fetching user : ", err);
+                   return res.status(400).json({
+                    error: "Error finding user/internal server error"
+                   }) 
+                }
+                if (user){
+                    logger.info(`Updating user with ID: ${userId}`);
+                    const { firstName, lastName, email, role } = req.body;
+                    if (firstName) user.firstName = firstName;
+                    if (lastName) user.lastName = lastName;
+                    if (email) user.email = email;
+                    if (role) user.role = role;
+
+                    await user.save();
+                    logger.info('User updated successfully:', user);
+                    return res.status(200).json({
+                        message: 'User updated successfully',
+                        user: {
+                            id: user._id,
+                            firstName: user.firstName,
+                            lastName: user.lastName,
+                            email: user.email,
+                            role: user.role
+                        }
+                    });
+                }
+            });
+        }
+        catch(err){
+            logger.error('Error updating user:', err);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
     }
 }

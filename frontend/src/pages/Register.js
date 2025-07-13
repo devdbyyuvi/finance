@@ -6,7 +6,11 @@ export function Register() {
         [lastName, setLastName] = useState(''),
         [email, setEmail] = useState(''),
         [pwd, setPwd] = useState(''),
-        [confirmPwd, setConfirmPwd] = useState('');
+        [confirmPwd, setConfirmPwd] = useState(''),
+        [loading, setLoading] = useState(false),
+        [error, setError] = useState(''),
+        [success, setSuccess] = useState('');
+
     const handleFirstName = (e) => {
         setFirstName(e.target.value)
         },
@@ -22,49 +26,122 @@ export function Register() {
         handleConfirmPwd = (e) => {
             setConfirmPwd(e.target.value)
         };
+
     let formFields = [
         {
             label: "firstname",
             type: "text",
             name: "firstname",
-            placeholder: "John Doe",
-            onchangeEvent : handleFirstName
+            placeholder: "John",
+            onchangeEvent : handleFirstName,
+            value: firstName
         },
         {
             label: "lastname",
             type: "text",
             name: "lastname",
             placeholder: "Doe",
-            onchangeEvent : handleLastName
+            onchangeEvent : handleLastName,
+            value: lastName
         },
         {
             label: "email",
             type: "email",
             name: "email",
             placeholder: "john@doe.com",
-            onchangeEvent : handleEmail
+            onchangeEvent : handleEmail,
+            value: email
         },
         {
             label: "password",
             type: "password",
             name: "password",
             placeholder: "********",
-            onchangeEvent: handlePWD
+            onchangeEvent: handlePWD,
+            value: pwd
         },
         {
             label: "confirm password",
             type: "password",
             name: "confirmPassword",
             placeholder: "********",
-            onchangeEvent : handleConfirmPwd
+            onchangeEvent : handleConfirmPwd,
+            value: confirmPwd
         }
     ]
+    console.log(process.env.REACT_APP_BACKEND)
+    const submitForm = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+        setSuccess('');
+
+        // if (!firstName || !lastName || !email || !pwd || !confirmPwd) {
+        //     setError('All fields are required');
+        //     setLoading(false);
+        //     return;
+        // }
+
+        // if (pwd !== confirmPwd) {
+        //     setError('Passwords do not match');
+        //     setLoading(false);
+        //     return;
+        // }
+
+        // if (pwd.length < 6) {
+        //     setError('Password must be at least 6 characters long');
+        //     setLoading(false);
+        //     return;
+        // }
+
+        try {
+            const response = await fetch(`${process.env.REACT_APP_BACKEND}api/auth/register`   , {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    firstName,
+                    lastName,
+                    email,
+                    password: pwd,
+                    cpassword: confirmPwd
+                }),
+                credentials: 'include'
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setSuccess('Account created successfully!');
+                // Clear form
+                setFirstName('');
+                setLastName('');
+                setEmail('');
+                setPwd('');
+                setConfirmPwd('');
+                
+                window.location.href = '/login';
+            } else {
+                alert(data.error || 'Registration failed');
+                setError(data.error || 'Registration failed');
+            }
+        } catch (error) {
+            setError('Network error. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    }
 
     return (
         <div className="App">
             <h1>Register Page</h1>
             <p>Please fill out the form to create a new account.</p>
-            <form>
+            
+            {error && <div className="error-message" style={{color: 'red', marginBottom: '10px'}}>{error}</div>}
+            {success && <div className="success-message" style={{color: 'green', marginBottom: '10px'}}>{success}</div>}
+            
+            <form onSubmit={submitForm}>
                 {formFields.map((field, index) => (
                     <Input
                         key={index}
@@ -73,9 +150,12 @@ export function Register() {
                         name={field.name}
                         placeholder={field.placeholder}
                         onchange={field.onchangeEvent}
+                        value={field.value}
                     />
                 ))}
-                <button type="submit" id="reg">Create Account</button>
+                <button type="submit" id="reg" disabled={loading}>
+                    {loading ? 'Creating Account...' : 'Create Account'}
+                </button>
             </form>
         </div>
     )

@@ -17,6 +17,7 @@ module.exports = {
 
             logger.info('Creating user with data:', req.body);
 
+            // Validate fields
             if (!firstName || !lastName || !email || !password || !cpassword) {
                 return res.status(400).json({ error: 'All fields are required' });
             }

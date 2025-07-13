@@ -15,7 +15,7 @@ export function Login() {
         { label: "Password", type: "password", name: "password", placeholder: "********", onchangeEvent : handlePWD },
     ]
     return (
-        <div class="App">
+        <div className="App">
             <h1>Login Page</h1>
             <p>Please enter your credentials to log in.</p>
             <form>

@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Navbar } from '../components/Navbar';
+import { Modal } from '../components/Modal';
 
 export function Dashboard() {
-
-
+    let [isModalTransaction, setModalTransaction] = useState(false);
+    let [isModalBudget, setModalBudget] = useState(false);
     return (
         <>
             <style>{`
@@ -261,23 +263,24 @@ export function Dashboard() {
             `}</style>
 
             <div className="dashboard-body">
+                {isModalTransaction && (
+                    <Modal
+                        type="transaction"
+                        onClose={() => setModalTransaction(false)}
+                    />
+                )}
+                {isModalBudget && (
+                    <Modal
+                        type="budget"
+                        onClose={() => setModalBudget(false)}
+                    />
+                ) }
                 <div className="dashboard">
                     <h2 className="welcome-header">
                         Hello, John Doe
                     </h2>
 
-                    <nav className="navbar">
-                        <button className="nav-item nav-item-active">
-                            Dashboard
-                        </button>
-                        <button className="nav-item">
-                            Reports
-                        </button>
-                        <button className="nav-item">
-                            Logout
-                        </button>
-                    </nav>
-
+                    <Navbar />
                     <div className="balance-section">
                         <div className="balance-card">
                             <div className="icon">💰</div>
@@ -303,13 +306,17 @@ export function Dashboard() {
                         justifyContent: 'space-around'
                     }}>
                         <div className="add-transaction-section">
-                            <button className="add-btn">
+                            <button className="add-btn" onClick={() => {
+                                setModalTransaction(!isModalTransaction)
+                            }}>
                                 + Add Transaction
                             </button>
                         </div>
 
                         <div className="add-transaction-section">
-                            <button className="add-btn">
+                            <button className="add-btn" onClick={() => {
+                                setModalBudget(!isModalBudget)
+                            }}>
                                 + Add Budget
                             </button>
                         </div>

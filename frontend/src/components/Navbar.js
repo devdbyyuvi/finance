@@ -1,7 +1,8 @@
 export const Navbar = () => (
-  <div className="navbar">
-    <button>Dashboard</button>
-    <button>Reports</button>
-    <button>Logout</button>
-  </div>
+    <div className="navbar">
+        <button>Dashboard</button>
+        <button>Reports</button>
+        <button>Profile</button>
+        <button>Logout</button>
+    </div>
 );

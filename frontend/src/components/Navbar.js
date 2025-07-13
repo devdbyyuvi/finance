@@ -1,4 +1,4 @@
-export const Navbar = () => (
+export const Navbar = (t) => (
     <div className="navbar">
         <button onClick={()=>{
             window.location.href='/dashboard';
@@ -6,9 +6,15 @@ export const Navbar = () => (
         <button onClick={()=>{
             window.location = '/reports';
         }}>Reports</button>
+        {t==='admin' && (
+            <button onClick={()=>{
+                window.location.href='/admin';
+            }}>Admin</button>
+        )}
+
         <button onClick={()=>{
-            window.location.href='/profile';
-        }}>Profile</button>
-        <button>Logout</button>
+            localStorage.removeItem('token');
+            window.location.href='/login'
+        }}>Logout</button>
     </div>
 );

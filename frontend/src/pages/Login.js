@@ -43,6 +43,7 @@ export function Login() {
                 // Clear form
                 setEmail('');
                 setPwd('');
+                localStorage.setItem('token', data.user.token);
                 window.location.href = '/dashboard';
             } else {
                 alert(data.error || 'Login failed');

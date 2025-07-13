@@ -55,13 +55,11 @@ module.exports = {
 
             const token = jwt.sign(
                 { id: newUser._id },
-                process.env.JWT_SECRET
+                process.env.JWT_SECRET,
+                {
+                    expiresIn: 24*60*60*7,
+                }
             );
-
-            res.cookie('token', token, {
-                httpOnly: true,
-                sameSite: 'strict',
-            });
 
             logger.info('User created successfully:', newUser);
 
@@ -110,12 +108,10 @@ module.exports = {
                 return res.status(500).json({ error: 'Internal server error' });
             }
 
-            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET,{
+                    expiresIn: 24*60*60*7,
+                });
 
-            res.cookie('token', token, {
-                httpOnly: true,
-                sameSite: 'strict',
-            });
 
             logger.info('User logged in successfully:', user.email);
             return res.status(200).json({
@@ -150,30 +146,24 @@ module.exports = {
             return res.status(500).json({ error: 'Internal server error' });
         }
     },
-    getUser: (req, res) => {
+    getUser: async (req, res) => {
         try {
             const userId = req.params.userid;
             logger.info(`Fetching user with ID: ${userId}`);
-            User.findById(userId, (err, user) => {
-                if (err) {
-                    logger.error('Error fetching user:', err);
-                    return res.status(500).json({ error: 'Internal server error' });
-                }
-                if (!user) {
-                    logger.error('User not found:', userId);
-                    return res.status(404).json({ error: 'User not found' });
-                }
-                else {
-                    logger.info('User fetched successfully:', user);
-                    return res.status(200).json({
-                        id: user._id,
-                        firstName: user.firstName,
-                        lastName: user.lastName,
-                        email: user.email,
-                        role: user.role
-                    });
-                }
-            })
+            const user = await User.findById(userId);
+            if (!user) {
+                logger.error('User not found:', userId);
+                return res.status(404).json({ error: 'User not found' });
+            } else {
+                logger.info('User fetchead successfully:', user);
+                return res.status(200).json({
+                    id: user._id,
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    email: user.email,
+                    role: user.role
+                });
+            }
         }
         catch (error) {
             logger.error('Error fetching user:', error);

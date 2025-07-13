@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Input } from './Input';
-export function Modal({ type, onClose }) {
+
+export function Modal({ type, onClose, onSuccess, userId }) {
+    const token = localStorage.getItem('token')
     const [formData, setFormData] = useState({
-        // Transaction fields
         transactionType: 'income',
         amount: '',
         category: '',
@@ -14,19 +15,139 @@ export function Modal({ type, onClose }) {
         year: new Date().getFullYear()
     });
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState('');
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
             [name]: value
         }));
+        if (error) setError('');
     };
 
-    const handleSubmit = (e) => {
+    const validateForm = () => {
+        if (type === 'transaction') {
+            if (!formData.amount || parseFloat(formData.amount) <= 0) {
+                setError('Amount must be a positive number');
+                return false;
+            }
+            if (!formData.category.trim()) {
+                setError('Category is required');
+                return false;
+            }
+            if (!formData.date) {
+                setError('Date is required');
+                return false;
+            }
+        } else if (type === 'budget') {
+            if (!formData.limitAmount || parseFloat(formData.limitAmount) <= 0) {
+                setError('Budget limit must be a positive number');
+                return false;
+            }
+            if (!formData.category.trim()) {
+                setError('Category is required');
+                return false;
+            }
+            if (!formData.month || formData.month < 1 || formData.month > 12) {
+                setError('Please select a valid month');
+                return false;
+            }
+            if (!formData.year) {
+                setError('Year is required');
+                return false;
+            }
+        }
+        return true;
+    };
+
+    const submitTransaction = async (transactionData) => {
+        const response = await fetch(`${process.env.REACT_APP_BACKEND}api/transactions`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(transactionData)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.msg || 'Failed to create transaction');
+        }
+
+        return response.json();
+    };
+
+    const submitBudget = async (budgetData) => {
+        const response = await fetch(`${process.env.REACT_APP_BACKEND}api/budgets`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+
+            },
+            body: JSON.stringify(budgetData)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.msg || 'Failed to create budget');
+        }
+
+        return response.json();
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Here you would typically send the data to your backend
-        console.log('Form submitted:', formData);
-        if (onClose) onClose();
+
+        if (!validateForm()) {
+            return;
+        }
+
+        setIsSubmitting(true);
+        setError('');
+
+        try {
+            let result;
+
+            if (type === 'transaction') {
+                const transactionData = {
+                    type: formData.transactionType,
+                    amount: parseFloat(formData.amount),
+                    category: formData.category.trim(),
+                    note: formData.note.trim(),
+                    userid: userId
+                };
+                console.log(transactionData)
+                result = await submitTransaction(transactionData);
+            } else {
+                const budgetData = {
+                    category: formData.category.trim(),
+                    limitAmount: parseFloat(formData.limitAmount),
+                    month: parseInt(formData.month),
+                    year: parseInt(formData.year),
+                    userId: userId
+                };
+
+                result = await submitBudget(budgetData);
+            }
+
+            console.log('Success:', result);
+
+            if (onSuccess) {
+                onSuccess(result);
+            }
+
+            if (onClose) onClose();
+
+        } catch (err) {
+            console.error('Error submitting form:', err);
+            setError(err.message || 'An error occurred while submitting the form');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleOverlayClick = (e) => {
@@ -59,7 +180,7 @@ export function Modal({ type, onClose }) {
                     max-width: 500px;
                     width: 90%;
                     max-height: 90vh;
-                    overflow-y: hidden;
+                    overflow-y: auto;
                     box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
                     border: 1px solid rgba(255, 255, 255, 0.1);
                     position: relative;
@@ -96,6 +217,16 @@ export function Modal({ type, onClose }) {
                 .close-btn:hover {
                     color: #f56565;
                     background: rgba(245, 101, 101, 0.1);
+                }
+
+                .error-message {
+                    background: rgba(245, 101, 101, 0.1);
+                    border: 1px solid rgba(245, 101, 101, 0.3);
+                    color: #f56565;
+                    padding: 12px 16px;
+                    border-radius: 8px;
+                    margin-bottom: 20px;
+                    font-size: 0.9rem;
                 }
 
                 .input-field {
@@ -184,6 +315,15 @@ export function Modal({ type, onClose }) {
                     cursor: pointer;
                     transition: all 0.3s ease;
                     min-width: 100px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                }
+
+                .btn:disabled {
+                    opacity: 0.6;
+                    cursor: not-allowed;
                 }
 
                 .btn-primary {
@@ -192,7 +332,7 @@ export function Modal({ type, onClose }) {
                     box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
                 }
 
-                .btn-primary:hover {
+                .btn-primary:hover:not(:disabled) {
                     transform: translateY(-2px);
                     box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
                 }
@@ -206,6 +346,20 @@ export function Modal({ type, onClose }) {
                 .btn-secondary:hover {
                     background: rgba(45, 55, 72, 1);
                     color: #e2e8f0;
+                }
+
+                .loading-spinner {
+                    width: 16px;
+                    height: 16px;
+                    border: 2px solid transparent;
+                    border-top: 2px solid currentColor;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                }
+
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
                 }
 
                 .amount-input {
@@ -251,7 +405,13 @@ export function Modal({ type, onClose }) {
                         <button className="close-btn" onClick={onClose}>×</button>
                     </div>
 
-                    <div onSubmit={handleSubmit}>
+                    {error && (
+                        <div className="error-message">
+                            {error}
+                        </div>
+                    )}
+
+                    <form onSubmit={handleSubmit}>
                         {type === 'transaction' ? (
                             <>
                                 <div className="input-field">
@@ -285,33 +445,50 @@ export function Modal({ type, onClose }) {
                                 </div>
 
                                 <div className="form-row">
-                                    <div className="amount-input">
-                                        <span className="currency-symbol">$</span>
-                                        <Input
-                                            label="Amount"
-                                            type="number"
-                                            name="amount"
-                                            placeholder="0.00"
-                                            onchange={handleInputChange}
-                                        />
+                                    <div className="input-field">
+                                        <label htmlFor="amount">Amount</label>
+                                        <div className="amount-input">
+                                            <span className="currency-symbol">$</span>
+                                            <input
+                                                type="number"
+                                                id="amount"
+                                                name="amount"
+                                                value={formData.amount}
+                                                onChange={handleInputChange}
+                                                placeholder="0.00"
+                                                step="0.01"
+                                                min="0"
+                                                required
+                                                style={{ paddingLeft: '35px' }}
+                                            />
+                                        </div>
                                     </div>
 
-                                    <Input
-                                        label="Date"
-                                        type="date"
-                                        name="date"
-                                        placeholder=""
-                                        onchange={handleInputChange}
-                                    />
+                                    <div className="input-field">
+                                        <label htmlFor="date">Date</label>
+                                        <input
+                                            type="date"
+                                            id="date"
+                                            name="date"
+                                            value={formData.date}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    </div>
                                 </div>
 
-                                <Input
-                                    label="Category"
-                                    type="text"
-                                    name="category"
-                                    placeholder="e.g., Food, Salary, Entertainment"
-                                    onchange={handleInputChange}
-                                />
+                                <div className="input-field">
+                                    <label htmlFor="category">Category</label>
+                                    <input
+                                        type="text"
+                                        id="category"
+                                        name="category"
+                                        value={formData.category}
+                                        onChange={handleInputChange}
+                                        placeholder="e.g., Food, Salary, Entertainment"
+                                        required
+                                    />
+                                </div>
 
                                 <div className="input-field">
                                     <label htmlFor="note">Note (Optional)</label>
@@ -327,23 +504,36 @@ export function Modal({ type, onClose }) {
                             </>
                         ) : (
                             <>
-                                <Input
-                                    label="Category"
-                                    type="text"
-                                    name="category"
-                                    placeholder="e.g., Food, Entertainment, Transportation"
-                                    onchange={handleInputChange}
-                                />
-
-                                <div className="amount-input">
-                                    <span className="currency-symbol">$</span>
-                                    <Input
-                                        label="Budget Limit"
-                                        type="number"
-                                        name="limitAmount"
-                                        placeholder="0.00"
-                                        onchange={handleInputChange}
+                                <div className="input-field">
+                                    <label htmlFor="category">Category</label>
+                                    <input
+                                        type="text"
+                                        id="category"
+                                        name="category"
+                                        value={formData.category}
+                                        onChange={handleInputChange}
+                                        placeholder="e.g., Food, Entertainment, Transportation"
+                                        required
                                     />
+                                </div>
+
+                                <div className="input-field">
+                                    <label htmlFor="limitAmount">Budget Limit</label>
+                                    <div className="amount-input">
+                                        <span className="currency-symbol">$</span>
+                                        <input
+                                            type="number"
+                                            id="limitAmount"
+                                            name="limitAmount"
+                                            value={formData.limitAmount}
+                                            onChange={handleInputChange}
+                                            placeholder="0.00"
+                                            step="0.01"
+                                            min="0"
+                                            required
+                                            style={{ paddingLeft: '35px' }}
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="form-row">
@@ -354,6 +544,7 @@ export function Modal({ type, onClose }) {
                                             id="month"
                                             value={formData.month}
                                             onChange={handleInputChange}
+                                            required
                                         >
                                             <option value={1}>January</option>
                                             <option value={2}>February</option>
@@ -370,26 +561,49 @@ export function Modal({ type, onClose }) {
                                         </select>
                                     </div>
 
-                                    <Input
-                                        label="Year"
-                                        type="number"
-                                        name="year"
-                                        placeholder="2025"
-                                        onchange={handleInputChange}
-                                    />
+                                    <div className="input-field">
+                                        <label htmlFor="year">Year</label>
+                                        <input
+                                            type="number"
+                                            id="year"
+                                            name="year"
+                                            value={formData.year}
+                                            onChange={handleInputChange}
+                                            placeholder="2025"
+                                            min="2020"
+                                            max="2030"
+                                            required
+                                        />
+                                    </div>
                                 </div>
                             </>
                         )}
 
                         <div className="form-actions">
-                            <button type="button" className="btn btn-secondary" onClick={onClose}>
+                            <button
+                                type="button"
+                                className="btn btn-secondary"
+                                onClick={onClose}
+                                disabled={isSubmitting}
+                            >
                                 Cancel
                             </button>
-                            <button type="submit" className="btn btn-primary">
-                                {type === 'transaction' ? 'Add Transaction' : 'Create Budget'}
+                            <button
+                                type="submit"
+                                className="btn btn-primary"
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? (
+                                    <>
+                                        <div className="loading-spinner"></div>
+                                        {type === 'transaction' ? 'Adding...' : 'Creating...'}
+                                    </>
+                                ) : (
+                                    type === 'transaction' ? 'Add Transaction' : 'Create Budget'
+                                )}
                             </button>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
         </>

@@ -9,7 +9,7 @@ const authRouter = require('./routes/authRoute');
 const transactionRouter = require('./routes/transactionRoute');
 const budgetRouter = require('./routes/budgetRoute');
 const adminRouter = require('./routes/adminRoute')
-
+console.log(process.env.FRONTEND);
 server.use(cors({
     origin : 'https://finance-beta-eight.vercel.app',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

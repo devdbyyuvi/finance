@@ -11,7 +11,7 @@ const budgetRouter = require('./routes/budgetRoute');
 const adminRouter = require('./routes/adminRoute')
 
 server.use(cors({
-    origin : process.env.FRONTEND,
+    origin : 'https://finance-beta-eight.vercel.app',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
       allowedHeaders: [
     'Content-Type',
